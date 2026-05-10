@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grille Studio Artistique Ultimate 2026 - Minimaliste</title>
+    <style>
+        :root {
+            --bg: #222222;
+            --panel: #2c2c2c;
+            --accent: #00d2ff;
+            --danger: #ff4444;
+            --out-shadow: 4px 4px 8px #151515, -3px -3px 8px #3a3a3a;
+            --in-shadow: inset 3px 3px 6px #151515, inset -2px -2px 5px #3a3a3a;
+            --accent-glow: 0 0 12px rgba(0, 210, 255, 0.4);
+        }
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; }
+
+        #app-container { display: flex; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #282828, #151515); position: relative; }
+
+        /* Barre de gauche verticale du L */
+        #toolbar { 
+            position: absolute; 
+            left: 20px; 
+            bottom: 76px; 
+            width: 44px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 0; 
+            gap: 12px; 
+            z-index: 100; 
+        }
+
+        .tool-btn { width: 44px; height: 44px; border-radius: 12px; border: none; background: linear-gradient(145deg, #323232, #232323); color: #aaa; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; box-shadow: var(--out-shadow); position: relative; }
+        .tool-btn:active { box-shadow: var(--in-shadow); transform: translateY(1px); }
+        .tool-btn.active { background: linear-gradient(145deg, #232323, #2d2d2d); color: var(--accent); box-shadow: var(--in-shadow), var(--accent-glow); border: none; }
+
+        #color-picker { width: 44px; height: 44px; border-radius: 12px; border: none; background: #333; cursor: pointer; box-shadow: var(--out-shadow); padding: 0; appearance: none; }
+
+        /* Barre du bas horizontale du L */
+        #bottom-bar { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 20px; 
+            display: flex; 
+            flex-direction: row;
+            padding: 0;
+            gap: 12px; 
+            z-index: 100; 
+            align-items: center; 
+        }
+        
+        #radius-menu, #export-menu, #confirm-panel { position: absolute; background: #2a2a2a; padding: 12px; border-radius: 16px; border: none; box-shadow: 10px 10px 20px rgba(0,0,0,0.6); display: none; flex-direction: column; gap: 8px; z-index: 110; }
+        #radius-menu { bottom: 120px; left: 80px; }
+        #export-menu { bottom: 80px; left: 98px; transform: translateX(-50%); }
+        #confirm-panel { bottom: 80px; left: 266px; transform: translateX(-50%); width: 130px; align-items: center; }
+        #radius-menu.show, #export-menu.show, #confirm-panel.show { display: flex; }
+
+        .menu-option { width: 80px; height: 36px; background: linear-gradient(145deg, #353535, #252525); border-radius: 8px; box-shadow: var(--out-shadow); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; transition: 0.2s; }
+        .menu-option:hover { background: var(--accent); color: #000; }
+        .menu-option.selected { box-shadow: var(--in-shadow); color: var(--accent); background: #222; }
+        .btn-confirm { background: linear-gradient(145deg, #ff5555, #cc3333); width: 100%; box-shadow: var(--out-shadow); color: white; }
+
+        #canvas-area { flex-grow: 1; position: relative; background: #111; box-shadow: inset 0 0 50px #000; overflow: hidden; width: 100%; height: 100%; }
+        canvas { display: block; touch-action: none; cursor: crosshair; width: 100%; height: 100%; }
+
+        /* Signature centrée et visible */
+        footer { 
+            position: fixed; 
+            bottom: 5px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            color: rgba(255, 255, 255, 0.2); 
+            font-size: 10px; 
+            letter-spacing: 2px; 
+            text-transform: uppercase;
+            pointer-events: none; 
+            z-index: 10; 
+            white-space: nowrap;
+        }
+
+        input[type="file"] { display: none; }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#573737">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<div id="app-container">
+    <div id="toolbar">
+        <button class="tool-btn" id="btn-draw" title="Dessiner">✎</button>
+        <button class="tool-btn" id="btn-erase" title="Gommer">✕</button>
+        <button class="tool-btn" id="btn-select" title="Sélectionner">⬚</button>
+        <button class="tool-btn" id="btn-move" title="Déplacer">✥</button>
+        <button class="tool-btn" id="btn-picker" title="Pipette">吸</button>
+        <button class="tool-btn" id="btn-radius" title="Fluide">∞</button>
+        <input type="color" id="color-picker" value="#00d2ff">
+    </div>
+
+    <div id="bottom-bar">
+        <button class="tool-btn active" id="btn-toggle-grid">#</button>
+        <button class="tool-btn" id="btn-export">💾</button>
+        <button class="tool-btn" id="btn-upload">📁</button>
+        <button class="tool-btn" id="btn-undo">⤺</button>
+        <button class="tool-btn" id="btn-reset" style="color: var(--danger);">🗑️</button>
+    </div>
+
+    <div id="radius-menu">
+        <button class="menu-option radius-option selected" data-radius="0">0%</button>
+        <button class="menu-option radius-option" data-radius="0.4">40%</button>
+        <button class="menu-option radius-option" data-radius="0.7">70%</button>
+        <button class="menu-option radius-option" data-radius="1">100%</button>
+    </div>
+
+    <div id="export-menu">
+        <button class="menu-option" data-format="png">PNG</button>
+        <button class="menu-option" data-format="jpeg">JPG</button>
+        <button class="menu-option" data-format="bmp">BMP</button>
+    </div>
+
+    <div id="confirm-panel">
+        <span style="color:white; font-size:10px; margin-bottom:5px;">Vider tout ?</span>
+        <button class="menu-option btn-confirm" id="confirm-yes">OUI</button>
+        <button class="menu-option" id="confirm-no">NON</button>
+    </div>
+
+    <div id="canvas-area"><canvas id="gridCanvas"></canvas></div>
+</div>
+
+<footer>Made by Laiche Brahim 2026 Paris</footer>
+
+<input type="file" id="file-input" accept="image/*">
+
+<script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const container = document.getElementById('canvas-area');
+    const colorInput = document.getElementById('color-picker');
+    const fileInput = document.getElementById('file-input');
+    const radiusMenu = document.getElementById('radius-menu');
+    const exportMenu = document.getElementById('export-menu');
+    const confirmPanel = document.getElementById('confirm-panel');
+
+    let scale = 1.0, offset = { x: 0, y: 0 }, gridSize = 50;
+    let currentTool = 'draw', coloredCells = new Map(), selectedCells = new Set(), history = [];
+    let borderRadiusFactor = 0, uploadedImg = null, imgPos = { x: 0, y: 0 };
+    let showGrid = true;
+    
+    let isDrawing = false, isZooming = false, isMovingContent = false;
+    let lastPos = null, lastDist = 0, lastTouchMid = null;
+    let moveStartGrid = { x: 0, y: 0 }, initialImgPos = { x: 0, y: 0 }, initialSelectionSnapshot = null;
+
+    function init() {
+        resize();
+        offset.x = canvas.width / 2;
+        offset.y = canvas.height / 2;
+        document.getElementById('btn-draw').classList.add('active');
+        setupEvents();
+        draw();
+    }
+
+    function setupEvents() {
+        document.getElementById('btn-toggle-grid').onclick = (e) => {
+            e.stopPropagation();
+            showGrid = !showGrid;
+            e.currentTarget.classList.toggle('active', showGrid);
+            draw();
+        };
+
+        document.getElementById('btn-export').onclick = (e) => { 
+            e.stopPropagation(); 
+            exportMenu.classList.toggle('show'); 
+            radiusMenu.classList.remove('show'); 
+            confirmPanel.classList.remove('show'); 
+        };
+        
+        document.querySelectorAll('#export-menu .menu-option').forEach(opt => {
+            opt.onclick = (e) => {
+                e.stopPropagation();
+                const format = opt.dataset.format;
+                const link = document.createElement('a');
+                link.download = `mon_art_2026.${format}`;
+                link.href = canvas.toDataURL(`image/${format}`, 1.0);
+                link.click();
+                exportMenu.classList.remove('show');
+            };
+        });
+
+        document.getElementById('btn-radius').onclick = (e) => { 
+            e.stopPropagation(); 
+            radiusMenu.classList.toggle('show'); 
+            exportMenu.classList.remove('show'); 
+            confirmPanel.classList.remove('show'); 
+        };
+        
+        document.querySelectorAll('.radius-option').forEach(opt => {
+            opt.onclick = function(e) {
+                e.stopPropagation();
+                document.querySelectorAll('.radius-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                borderRadiusFactor = parseFloat(this.dataset.radius);
+                radiusMenu.classList.remove('show');
+                draw();
+            };
+        });
+
+        document.getElementById('btn-reset').onclick = (e) => { 
+            e.stopPropagation(); 
+            confirmPanel.classList.add('show'); 
+            exportMenu.classList.remove('show');
+        };
+        
+        document.getElementById('confirm-yes').onclick = (e) => { 
+            e.stopPropagation();
+            coloredCells.clear(); 
+            selectedCells.clear(); 
+            uploadedImg = null; 
+            confirmPanel.classList.remove('show'); 
+            draw(); 
+        };
+        
+        document.getElementById('confirm-no').onclick = (e) => {
+            e.stopPropagation();
+            confirmPanel.classList.remove('show');
+        };
+
+        document.getElementById('btn-upload').onclick = (e) => { e.stopPropagation(); fileInput.click(); };
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => { 
+                    uploadedImg = img; 
+                    imgPos = { x: -img.width/2, y: -img.height/2 }; 
+                    draw(); 
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        canvas.addEventListener('pointerdown', (e) => {
+            if (isZooming) return;
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = (e.clientX - rect.left - offset.x) / scale;
+            const mouseY = (e.clientY - rect.top - offset.y) / scale;
+            const gx = Math.floor(mouseX / gridSize);
+            const gy = Math.floor(mouseY / gridSize);
+
+            if (currentTool === 'move') {
+                isMovingContent = true;
+                moveStartGrid = { x: gx, y: gy };
+                if (selectedCells.size > 0) {
+                    saveHistory();
+                    initialSelectionSnapshot = new Map();
+                    selectedCells.forEach(key => { if (coloredCells.has(key)) { initialSelectionSnapshot.set(key, coloredCells.get(key)); coloredCells.delete(key); } });
+                } else if (uploadedImg) { initialImgPos = { ...imgPos }; }
+                return;
+            }
+
+            isDrawing = true;
+            lastPos = { x: e.clientX, y: e.clientY };
+            if (currentTool !== 'picker' && currentTool !== 'select') saveHistory();
+            handleAction(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (isZooming) return;
+            const rect = canvas.getBoundingClientRect();
+            const gx = Math.floor(((e.clientX - rect.left - offset.x) / scale) / gridSize);
+            const gy = Math.floor(((e.clientY - rect.top - offset.y) / scale) / gridSize);
+
+            if (isMovingContent) {
+                const dx = gx - moveStartGrid.x; const dy = gy - moveStartGrid.y;
+                if (initialSelectionSnapshot) {
+                    let tempColored = new Map(coloredCells); let newSelected = new Set();
+                    initialSelectionSnapshot.forEach((color, key) => {
+                        const [origX, origY] = key.split(',').map(Number);
+                        const newKey = `${origX + dx},${origY + dy}`;
+                        tempColored.set(newKey, color); newSelected.add(newKey);
+                    });
+                    drawWithTemp(tempColored, newSelected);
+                } else if (uploadedImg) { imgPos.x = initialImgPos.x + (dx * gridSize); imgPos.y = initialImgPos.y + (dy * gridSize); draw(); }
+                return;
+            }
+
+            if (!isDrawing) return;
+            interpolate(lastPos.x, lastPos.y, e.clientX, e.clientY);
+            lastPos = { x: e.clientX, y: e.clientY };
+            draw();
+        });
+
+        window.addEventListener('pointerup', (event) => {
+            if (isMovingContent && initialSelectionSnapshot) {
+                const rect = canvas.getBoundingClientRect();
+                const dx = Math.floor(((event.clientX - rect.left - offset.x) / scale) / gridSize) - moveStartGrid.x;
+                const dy = Math.floor(((event.clientY - rect.top - offset.y) / scale) / gridSize) - moveStartGrid.y;
+                let newSelected = new Set();
+                initialSelectionSnapshot.forEach((color, key) => {
+                    const [origX, origY] = key.split(',').map(Number);
+                    const newKey = `${origX + dx},${origY + dy}`;
+                    coloredCells.set(newKey, color); newSelected.add(newKey);
+                });
+                selectedCells = newSelected;
+            }
+            isDrawing = false; isMovingContent = false; initialSelectionSnapshot = null; draw();
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length >= 2) {
+                isZooming = true; isDrawing = false;
+                lastDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                lastTouchMid = { x: (e.touches[0].clientX + e.touches[1].clientX) / 2, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 };
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length >= 2) {
+                e.preventDefault();
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2, midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                const newScale = Math.min(Math.max(0.1, scale * (dist / lastDist)), 10);
+                offset.x = midX - (midX - offset.x) * (newScale / scale);
+                offset.y = midY - (midY - offset.y) * (newScale / scale);
+                if (lastTouchMid) { offset.x += (midX - lastTouchMid.x); offset.y += (midY - lastTouchMid.y); }
+                scale = newScale; lastDist = dist; lastTouchMid = { x: midX, y: midY };
+                draw();
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', () => { if (event.touches.length < 2) isZooming = false; });
+
+        ['draw', 'erase', 'select', 'move', 'picker'].forEach(tool => {
+            document.getElementById('btn-' + tool).onclick = (e) => {
+                e.stopPropagation();
+                if (currentTool === 'select' && tool === 'select') { 
+                    currentTool = 'draw'; 
+                    selectedCells.clear(); 
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active')); 
+                    document.getElementById('btn-draw').classList.add('active'); 
+                } 
+                else { 
+                    currentTool = tool; 
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active')); 
+                    document.getElementById('btn-' + tool).classList.add('active'); 
+                    if (tool !== 'move' && tool !== 'select') selectedCells.clear(); 
+                }
+                draw();
+            };
+        });
+
+        document.getElementById('btn-undo').onclick = (e) => { e.stopPropagation(); undo(); };
+        window.onclick = () => { 
+            radiusMenu.classList.remove('show'); 
+            exportMenu.classList.remove('show'); 
+            confirmPanel.classList.remove('show'); 
+        };
+    }
+
+    function handleAction(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = clientX - rect.left, my = clientY - rect.top;
+        const worldX = (mx - offset.x) / scale;
+        const worldY = (my - offset.y) / scale;
+
+        if (currentTool === 'picker') {
+            const p = ctx.getImageData(mx, my, 1, 1).data;
+            colorInput.value = "#" + ((1 << 24) + (p[0] << 16) + (p[1] << 8) + p[2]).toString(16).slice(1);
+            return;
+        }
+
+        const gx = Math.floor(worldX / gridSize);
+        const gy = Math.floor(worldY / gridSize);
+        const key = `${gx},${gy}`;
+
+        if (currentTool === 'draw') coloredCells.set(key, colorInput.value);
+        else if (currentTool === 'erase') {
+            coloredCells.delete(key); selectedCells.delete(key);
+            if (uploadedImg && worldX >= imgPos.x && worldX <= imgPos.x + uploadedImg.width && worldY >= imgPos.y && worldY <= imgPos.y + uploadedImg.height) uploadedImg = null;
+        } else if (currentTool === 'select') { if(coloredCells.has(key)) selectedCells.add(key); }
+    }
+
+    function interpolate(x1, y1, x2, y2) { const d = Math.hypot(x2 - x1, y2 - y1); const s = Math.ceil(d / (gridSize * scale / 3)); for (let i = 0; i <= s; i++) handleAction(x1 + (x2 - x1) * (i / s), y1 + (y2 - y1) * (i / s)); }
+    
+    function drawArtistCell(ctx, gx, gy, size, f, cells) {
+        const x = gx * size, y = gy * size, c = cells.get(`${gx},${gy}`), r = (size/2)*f;
+        const bleed = 1.0; 
+        ctx.fillStyle = c; 
+        const n = cells.get(`${gx},${gy-1}`) === c, s = cells.get(`${gx},${gy+1}`) === c, e = cells.get(`${gx+1},${gy}`) === c, w = cells.get(`${gx-1},${gy}`) === c;
+        
+        ctx.beginPath(); 
+        ctx.moveTo(x + size/2, y - bleed);
+        if (!n && !e) ctx.arcTo(x + size + bleed, y - bleed, x + size + bleed, y + size/2, r); else ctx.lineTo(x + size + bleed, y - bleed);
+        if (!s && !e) ctx.arcTo(x + size + bleed, y + size + bleed, x + size/2, y + size + bleed, r); else ctx.lineTo(x + size + bleed, y + size + bleed);
+        if (!s && !w) ctx.arcTo(x - bleed, y + size + bleed, x - bleed, y + size/2, r); else ctx.lineTo(x - bleed, y + size + bleed);
+        if (!n && !w) ctx.arcTo(x - bleed, y - bleed, x + size/2, y - bleed, r); else ctx.lineTo(x - bleed, y - bleed);
+        ctx.closePath(); ctx.fill();
+        
+        if (f > 0) { 
+            const hN = cells.has(`${gx},${gy-1}`), hS = cells.has(`${gx},${gy+1}`), hE = cells.has(`${gx+1},${gy}`), hW = cells.has(`${gx-1},${gy}`); 
+            drawC(ctx, x+size, y, -1, 1, cells.has(`${gx+1},${gy-1}`), hE, hN, r, c, bleed); 
+            drawC(ctx, x+size, y+size, -1, -1, cells.has(`${gx+1},${gy+1}`), hE, hS, r, c, bleed); 
+            drawC(ctx, x, y+size, 1, -1, cells.has(`${gx-1},${gy+1}`), hW, hS, r, c, bleed); 
+            drawC(ctx, x, y, 1, 1, cells.has(`${gx-1},${gy-1}`), hW, hN, r, c, bleed); 
+        }
+    }
+
+    function drawC(ctx, cx, cy, dx, dy, dg, s1, s2, r, c, bleed) { if (s1 && s2 && !dg) { ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(cx + (bleed * -dx), cy + (bleed * -dy)); ctx.lineTo(cx + (bleed * -dx), cy + (r * dy)); ctx.arcTo(cx + (bleed * -dx), cy + (bleed * -dy), cx + (r * dx), cy + (bleed * -dy), r); ctx.closePath(); ctx.fill(); } }
+    
+    function draw() { drawWithTemp(coloredCells, selectedCells); }
+    
+    function drawWithTemp(cells, selection) {
+        ctx.fillStyle = "#111111"; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height); 
+        ctx.save(); 
+        ctx.translate(offset.x, offset.y); 
+        ctx.scale(scale, scale);
+        
+        if (uploadedImg) ctx.drawImage(uploadedImg, imgPos.x, imgPos.y);
+        
+        cells.forEach((color, key) => { 
+            const [gx, gy] = key.split(',').map(Number); 
+            drawArtistCell(ctx, gx, gy, gridSize, borderRadiusFactor, cells); 
+            if (selection.has(key)) { 
+                ctx.strokeStyle = "white"; 
+                ctx.lineWidth = 2/scale; 
+                ctx.strokeRect(gx*gridSize+2, gy*gridSize+2, gridSize-4, gridSize-4); 
+            } 
+        });
+        
+        if (showGrid) { 
+            ctx.beginPath(); 
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)"; 
+            ctx.lineWidth = 1/scale; 
+            const l = Math.floor(-offset.x/(gridSize*scale)), t = Math.floor(-offset.y/(gridSize*scale)), r = Math.ceil((canvas.width-offset.x)/(gridSize*scale)), b = Math.ceil((canvas.height-offset.y)/(gridSize*scale)); 
+            for (let x = l; x <= r; x++) { ctx.moveTo(x*gridSize, t*gridSize); ctx.lineTo(x*gridSize, b*gridSize); } 
+            for (let y = t; y <= b; y++) { ctx.moveTo(l*gridSize, y*gridSize); ctx.lineTo(r*gridSize, y*gridSize); } 
+            ctx.stroke(); 
+        }
+        ctx.restore();
+    }
+
+    function saveHistory() { history.push(new Map(coloredCells)); if (history.length > 50) history.shift(); }
+    function undo() { if (history.length > 0) { coloredCells = history.pop(); draw(); } }
+    function resize() { 
+        canvas.width = container.clientWidth; 
+        canvas.height = container.clientHeight; 
+        draw(); 
+    }
+    window.addEventListener('resize', resize);
+    init();
+</script>
+
+    <style>
+        #pwaInstallBtn {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #573737; color: white; border: none; padding: 12px 24px;
+            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: none; z-index: 10000; font-weight: bold; cursor: pointer;
+        }
+    </style>
+    <button id="pwaInstallBtn">Installer l'application</button>
+    <script>
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwaInstallBtn').style.display = 'block';
+        });
+        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('pwaInstallBtn').style.display = 'none';
+            }
+        });
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+            });
+        }
+    </script>
+</body>
+</html>
