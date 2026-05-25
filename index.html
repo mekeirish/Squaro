@@ -6,89 +6,235 @@
     <title>Grille Studio Artistique Ultimate 2026 - Minimaliste</title>
     <style>
         :root {
-            --bg: #222222;
-            --panel: #2c2c2c;
+            --bg: #1e1e1e;
+            --panel: #2a2a2a;
             --accent: #00d2ff;
-            --danger: #ff4444;
-            --out-shadow: 4px 4px 8px #151515, -3px -3px 8px #3a3a3a;
-            --in-shadow: inset 3px 3px 6px #151515, inset -2px -2px 5px #3a3a3a;
-            --accent-glow: 0 0 12px rgba(0, 210, 255, 0.4);
+            --accent-dark: #009ac7;
+            --danger: #ff5555;
+            --danger-dark: #cc3333;
+            --text: #eaeaea;
+            --text-dim: #aaa;
+            --out-shadow: 5px 5px 12px #121212, -3px -3px 8px #2e2e2e;
+            --in-shadow: inset 4px 4px 8px #121212, inset -2px -2px 6px #2e2e2e;
+            --accent-glow: 0 0 10px rgba(0, 210, 255, 0.5);
+            --border-radius-btn: 14px;
+            --border-radius-menu: 18px;
+            --transition: 0.12s ease-out;
         }
 
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; }
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        #app-container { display: flex; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #282828, #151515); position: relative; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: var(--bg); font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, Roboto, sans-serif; }
 
-        /* Barre de gauche verticale du L */
+        #app-container { display: flex; width: 100vw; height: 100vh; background: radial-gradient(circle at 30% 20%, #232323, #111111); position: relative; }
+
+        /* Barre de gauche verticale – relevée */
         #toolbar { 
             position: absolute; 
             left: 20px; 
-            bottom: 76px; 
-            width: 44px; 
+            bottom: 116px;   /* relevée de 76px à 116px */
+            width: 52px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 0; 
+            padding: 10px 0; 
             gap: 12px; 
             z-index: 100; 
+            background: rgba(30,30,30,0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            box-shadow: var(--out-shadow);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .tool-btn { width: 44px; height: 44px; border-radius: 12px; border: none; background: linear-gradient(145deg, #323232, #232323); color: #aaa; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; box-shadow: var(--out-shadow); position: relative; }
-        .tool-btn:active { box-shadow: var(--in-shadow); transform: translateY(1px); }
-        .tool-btn.active { background: linear-gradient(145deg, #232323, #2d2d2d); color: var(--accent); box-shadow: var(--in-shadow), var(--accent-glow); border: none; }
+        .tool-btn { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: var(--border-radius-btn); 
+            border: none; 
+            background: linear-gradient(145deg, #323232, #262626);
+            color: #c0c0c0; 
+            cursor: pointer; 
+            font-size: 20px; 
+            font-weight: 500;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all var(--transition); 
+            box-shadow: var(--out-shadow); 
+        }
+        .tool-btn:active { 
+            box-shadow: var(--in-shadow); 
+            transform: translateY(1px) scale(0.97); 
+        }
+        .tool-btn.active { 
+            background: linear-gradient(145deg, #242424, #1c1c1c); 
+            color: var(--accent); 
+            box-shadow: var(--in-shadow), var(--accent-glow); 
+            text-shadow: 0 0 2px var(--accent);
+        }
 
-        #color-picker { width: 44px; height: 44px; border-radius: 12px; border: none; background: #333; cursor: pointer; box-shadow: var(--out-shadow); padding: 0; appearance: none; }
+        #color-picker { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            border: 2px solid rgba(255,255,255,0.15); 
+            background: #2c2c2c; 
+            cursor: pointer; 
+            box-shadow: var(--out-shadow); 
+            padding: 0; 
+        }
+        #color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+        #color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+        #color-picker:active { transform: scale(0.96); }
 
-        /* Barre du bas horizontale du L */
+        /* Barre du bas horizontale – relevée */
         #bottom-bar { 
             position: absolute; 
-            bottom: 20px; 
+            bottom: 56px;    /* relevée de 20px à 56px */
             left: 20px; 
             display: flex; 
             flex-direction: row;
-            padding: 0;
+            padding: 8px 12px;
             gap: 12px; 
             z-index: 100; 
             align-items: center; 
+            background: rgba(30,30,30,0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            box-shadow: var(--out-shadow);
+            border: 1px solid rgba(255,255,255,0.05);
         }
         
-        #radius-menu, #export-menu, #confirm-panel { position: absolute; background: #2a2a2a; padding: 12px; border-radius: 16px; border: none; box-shadow: 10px 10px 20px rgba(0,0,0,0.6); display: none; flex-direction: column; gap: 8px; z-index: 110; }
+        /* Menus contextuels – positions originales */
+        #radius-menu, #export-menu, #confirm-panel { 
+            position: absolute; 
+            background: rgba(28,28,32,0.96);
+            backdrop-filter: blur(16px);
+            padding: 12px; 
+            border-radius: var(--border-radius-menu); 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 18px 30px rgba(0,0,0,0.5); 
+            display: none; 
+            flex-direction: column; 
+            gap: 10px; 
+            z-index: 110; 
+        }
         #radius-menu { bottom: 120px; left: 80px; }
-        #export-menu { bottom: 80px; left: 98px; transform: translateX(-50%); }
-        #confirm-panel { bottom: 80px; left: 266px; transform: translateX(-50%); width: 130px; align-items: center; }
+        #export-menu { bottom: 80px; left: 98px; }
+        #confirm-panel { bottom: 80px; left: 266px; width: 130px; align-items: center; }
+
         #radius-menu.show, #export-menu.show, #confirm-panel.show { display: flex; }
 
-        .menu-option { width: 80px; height: 36px; background: linear-gradient(145deg, #353535, #252525); border-radius: 8px; box-shadow: var(--out-shadow); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; transition: 0.2s; }
-        .menu-option:hover { background: var(--accent); color: #000; }
-        .menu-option.selected { box-shadow: var(--in-shadow); color: var(--accent); background: #222; }
-        .btn-confirm { background: linear-gradient(145deg, #ff5555, #cc3333); width: 100%; box-shadow: var(--out-shadow); color: white; }
+        .menu-option { 
+            width: 100%; 
+            min-width: 90px;
+            height: 38px; 
+            background: linear-gradient(145deg, #353535, #282828); 
+            border-radius: 40px; 
+            box-shadow: var(--out-shadow); 
+            border: none; 
+            color: #f0f0f0; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 600; 
+            font-size: 12px; 
+            letter-spacing: 0.3px;
+            transition: all 0.1s; 
+        }
+        .menu-option:active { 
+            box-shadow: var(--in-shadow); 
+            transform: scale(0.97);
+        }
+        .menu-option.selected { 
+            box-shadow: var(--in-shadow); 
+            color: var(--accent); 
+            background: #222; 
+            border-left: 2px solid var(--accent);
+        }
+        .btn-confirm { 
+            background: linear-gradient(145deg, #ff5555, #cc3333); 
+            color: white;
+        }
 
-        #canvas-area { flex-grow: 1; position: relative; background: #111; box-shadow: inset 0 0 50px #000; overflow: hidden; width: 100%; height: 100%; }
-        canvas { display: block; touch-action: none; cursor: crosshair; width: 100%; height: 100%; }
+        /* Zone canvas avec un espace en bas pour la signature */
+        #canvas-area { 
+            flex-grow: 1; 
+            position: relative; 
+            background: #0a0a0a; 
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.6); 
+            overflow: hidden; 
+            width: 100%; 
+            height: 100%;
+            padding-bottom: 36px;   /* espace vide pour la signature */
+            box-sizing: border-box;
+        }
+        canvas { 
+            display: block; 
+            touch-action: none; 
+            cursor: crosshair; 
+            width: 100%; 
+            height: 100%; 
+        }
 
-        /* Signature centrée et visible */
+        /* Signature en bas, bien visible et sans chevauchement */
         footer { 
             position: fixed; 
-            bottom: 5px; 
+            bottom: 8px; 
             left: 50%; 
             transform: translateX(-50%); 
-            color: rgba(255, 255, 255, 0.2); 
+            color: rgba(255, 255, 255, 0.35); 
             font-size: 10px; 
-            letter-spacing: 2px; 
+            font-weight: 400;
+            letter-spacing: 1.5px; 
             text-transform: uppercase;
             pointer-events: none; 
             z-index: 10; 
             white-space: nowrap;
+            background: rgba(0,0,0,0.4);
+            padding: 5px 14px;
+            border-radius: 40px;
+            backdrop-filter: blur(6px);
         }
 
         input[type="file"] { display: none; }
+
+        /* Animation légère d'apparition des menus */
+        .show {
+            animation: fadeIn 0.12s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        #pwaInstallBtn {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #1f4e4e, #0e2e2e);
+            color: white; border: none; padding: 10px 24px;
+            border-radius: 60px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            display: none; z-index: 10000; font-weight: bold; cursor: pointer;
+            backdrop-filter: blur(8px);
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            transition: 0.1s;
+        }
+        #pwaInstallBtn:active { transform: translateX(-50%) scale(0.97); }
     </style>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#573737">
+    <meta name="theme-color" content="#1a1a1a">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-</head>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4b6cb7">
+<link rel="apple-touch-icon" href="icon.png"></head>
 <body>
 
 <div id="app-container">
@@ -124,7 +270,7 @@
     </div>
 
     <div id="confirm-panel">
-        <span style="color:white; font-size:10px; margin-bottom:5px;">Vider tout ?</span>
+        <span style="color:white; font-size:11px; font-weight:500; margin-bottom:6px;">Vider tout ?</span>
         <button class="menu-option btn-confirm" id="confirm-yes">OUI</button>
         <button class="menu-option" id="confirm-no">NON</button>
     </div>
@@ -437,7 +583,7 @@
         
         if (showGrid) { 
             ctx.beginPath(); 
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)"; 
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.2)"; 
             ctx.lineWidth = 1/scale; 
             const l = Math.floor(-offset.x/(gridSize*scale)), t = Math.floor(-offset.y/(gridSize*scale)), r = Math.ceil((canvas.width-offset.x)/(gridSize*scale)), b = Math.ceil((canvas.height-offset.y)/(gridSize*scale)); 
             for (let x = l; x <= r; x++) { ctx.moveTo(x*gridSize, t*gridSize); ctx.lineTo(x*gridSize, b*gridSize); } 
@@ -458,15 +604,7 @@
     init();
 </script>
 
-    <style>
-        #pwaInstallBtn {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #573737; color: white; border: none; padding: 12px 24px;
-            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: none; z-index: 10000; font-weight: bold; cursor: pointer;
-        }
-    </style>
-    <button id="pwaInstallBtn">Installer l'application</button>
+    <button id="pwaInstallBtn">📱 Installer l'application</button>
     <script>
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -488,5 +626,7 @@
             });
         }
     </script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
 </body>
 </html>
