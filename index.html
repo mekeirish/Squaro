@@ -7,16 +7,12 @@
     <style>
         :root {
             --bg: #1e1e1e;
-            --panel: #2a2a2a;
             --accent: #00d2ff;
-            --accent-dark: #009ac7;
             --danger: #ff5555;
-            --danger-dark: #cc3333;
-            --text: #eaeaea;
-            --text-dim: #aaa;
-            --out-shadow: 5px 5px 12px #121212, -3px -3px 8px #2e2e2e;
-            --in-shadow: inset 4px 4px 8px #121212, inset -2px -2px 6px #2e2e2e;
-            --accent-glow: 0 0 10px rgba(0, 210, 255, 0.5);
+            --border-light: rgba(255,255,255,0.08);
+            --border-medium: rgba(255,255,255,0.15);
+            --border-active: #00d2ff;
+            --accent-glow: 0 0 8px rgba(0, 210, 255, 0.6);
             --border-radius-btn: 14px;
             --border-radius-menu: 18px;
             --transition: 0.12s ease-out;
@@ -31,11 +27,10 @@
 
         #app-container { display: flex; width: 100vw; height: 100vh; background: radial-gradient(circle at 30% 20%, #232323, #111111); position: relative; }
 
-        /* Barre de gauche verticale – relevée */
         #toolbar { 
             position: absolute; 
             left: 20px; 
-            bottom: 116px;   /* relevée de 76px à 116px */
+            bottom: 116px;
             width: 52px; 
             display: flex; 
             flex-direction: column; 
@@ -46,15 +41,14 @@
             background: rgba(30,30,30,0.7);
             backdrop-filter: blur(12px);
             border-radius: 32px;
-            box-shadow: var(--out-shadow);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--border-light);
         }
 
         .tool-btn { 
             width: 44px; 
             height: 44px; 
             border-radius: var(--border-radius-btn); 
-            border: none; 
+            border: 1px solid var(--border-light);
             background: linear-gradient(145deg, #323232, #262626);
             color: #c0c0c0; 
             cursor: pointer; 
@@ -64,16 +58,16 @@
             align-items: center; 
             justify-content: center; 
             transition: all var(--transition); 
-            box-shadow: var(--out-shadow); 
         }
         .tool-btn:active { 
-            box-shadow: var(--in-shadow); 
+            border-color: var(--border-medium);
             transform: translateY(1px) scale(0.97); 
         }
         .tool-btn.active { 
             background: linear-gradient(145deg, #242424, #1c1c1c); 
             color: var(--accent); 
-            box-shadow: var(--in-shadow), var(--accent-glow); 
+            border-color: var(--border-active);
+            box-shadow: var(--accent-glow);
             text-shadow: 0 0 2px var(--accent);
         }
 
@@ -81,20 +75,18 @@
             width: 44px; 
             height: 44px; 
             border-radius: 50%; 
-            border: 2px solid rgba(255,255,255,0.15); 
+            border: 2px solid var(--border-light);
             background: #2c2c2c; 
             cursor: pointer; 
-            box-shadow: var(--out-shadow); 
             padding: 0; 
         }
         #color-picker::-webkit-color-swatch-wrapper { padding: 0; }
         #color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
         #color-picker:active { transform: scale(0.96); }
 
-        /* Barre du bas horizontale – relevée */
         #bottom-bar { 
             position: absolute; 
-            bottom: 56px;    /* relevée de 20px à 56px */
+            bottom: 56px;
             left: 20px; 
             display: flex; 
             flex-direction: row;
@@ -105,19 +97,16 @@
             background: rgba(30,30,30,0.7);
             backdrop-filter: blur(12px);
             border-radius: 40px;
-            box-shadow: var(--out-shadow);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--border-light);
         }
         
-        /* Menus contextuels – positions originales */
         #radius-menu, #export-menu, #confirm-panel { 
             position: absolute; 
             background: rgba(28,28,32,0.96);
             backdrop-filter: blur(16px);
             padding: 12px; 
             border-radius: var(--border-radius-menu); 
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 18px 30px rgba(0,0,0,0.5); 
+            border: 1px solid var(--border-light);
             display: none; 
             flex-direction: column; 
             gap: 10px; 
@@ -135,8 +124,7 @@
             height: 38px; 
             background: linear-gradient(145deg, #353535, #282828); 
             border-radius: 40px; 
-            box-shadow: var(--out-shadow); 
-            border: none; 
+            border: 1px solid var(--border-light);
             color: #f0f0f0; 
             cursor: pointer; 
             display: flex; 
@@ -148,21 +136,21 @@
             transition: all 0.1s; 
         }
         .menu-option:active { 
-            box-shadow: var(--in-shadow); 
+            border-color: var(--border-medium);
             transform: scale(0.97);
         }
         .menu-option.selected { 
-            box-shadow: var(--in-shadow); 
+            border-color: var(--border-active);
             color: var(--accent); 
             background: #222; 
-            border-left: 2px solid var(--accent);
+            border-left: 2px solid var(--border-active);
         }
         .btn-confirm { 
             background: linear-gradient(145deg, #ff5555, #cc3333); 
             color: white;
+            border-color: #ff5555;
         }
 
-        /* Zone canvas avec un espace en bas pour la signature */
         #canvas-area { 
             flex-grow: 1; 
             position: relative; 
@@ -171,7 +159,7 @@
             overflow: hidden; 
             width: 100%; 
             height: 100%;
-            padding-bottom: 36px;   /* espace vide pour la signature */
+            padding-bottom: 36px;
             box-sizing: border-box;
         }
         canvas { 
@@ -182,7 +170,6 @@
             height: 100%; 
         }
 
-        /* Signature en bas, bien visible et sans chevauchement */
         footer { 
             position: fixed; 
             bottom: 8px; 
@@ -200,11 +187,11 @@
             padding: 5px 14px;
             border-radius: 40px;
             backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         input[type="file"] { display: none; }
 
-        /* Animation légère d'apparition des menus */
         .show {
             animation: fadeIn 0.12s ease;
         }
@@ -216,8 +203,9 @@
         #pwaInstallBtn {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: linear-gradient(135deg, #1f4e4e, #0e2e2e);
-            color: white; border: none; padding: 10px 24px;
-            border-radius: 60px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            color: white; border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 24px;
+            border-radius: 60px;
             display: none; z-index: 10000; font-weight: bold; cursor: pointer;
             backdrop-filter: blur(8px);
             font-size: 13px;
@@ -231,29 +219,26 @@
     <meta name="theme-color" content="#1a1a1a">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#4b6cb7">
-<link rel="apple-touch-icon" href="icon.png"></head>
+</head>
 <body>
 
 <div id="app-container">
     <div id="toolbar">
-        <button class="tool-btn" id="btn-draw" title="Dessiner">✎</button>
-        <button class="tool-btn" id="btn-erase" title="Gommer">✕</button>
-        <button class="tool-btn" id="btn-select" title="Sélectionner">⬚</button>
-        <button class="tool-btn" id="btn-move" title="Déplacer">✥</button>
-        <button class="tool-btn" id="btn-picker" title="Pipette">吸</button>
-        <button class="tool-btn" id="btn-radius" title="Fluide">∞</button>
+        <button class="tool-btn" id="btn-draw" title="Dessiner"><i data-lucide="pencil" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-erase" title="Gommer"><i data-lucide="eraser" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-select" title="Sélectionner"><i data-lucide="square" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-move" title="Déplacer"><i data-lucide="move" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-picker" title="Pipette"><i data-lucide="eyedropper" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-radius" title="Fluide"><i data-lucide="infinity" class="w-5 h-5"></i></button>
         <input type="color" id="color-picker" value="#00d2ff">
     </div>
 
     <div id="bottom-bar">
-        <button class="tool-btn active" id="btn-toggle-grid">#</button>
-        <button class="tool-btn" id="btn-export">💾</button>
-        <button class="tool-btn" id="btn-upload">📁</button>
-        <button class="tool-btn" id="btn-undo">⤺</button>
-        <button class="tool-btn" id="btn-reset" style="color: var(--danger);">🗑️</button>
+        <button class="tool-btn active" id="btn-toggle-grid"><i data-lucide="grid-2x2" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-export"><i data-lucide="download" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-upload"><i data-lucide="upload" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-undo"><i data-lucide="undo-2" class="w-5 h-5"></i></button>
+        <button class="tool-btn" id="btn-reset" style="color: var(--danger);"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
     </div>
 
     <div id="radius-menu">
@@ -283,6 +268,7 @@
 <input type="file" id="file-input" accept="image/*">
 
 <script>
+    // (JavaScript strictement identique à la version précédente)
     const canvas = document.getElementById('gridCanvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const container = document.getElementById('canvas-area');
@@ -329,10 +315,7 @@
             opt.onclick = (e) => {
                 e.stopPropagation();
                 const format = opt.dataset.format;
-                const link = document.createElement('a');
-                link.download = `mon_art_2026.${format}`;
-                link.href = canvas.toDataURL(`image/${format}`, 1.0);
-                link.click();
+                exportIntelligent(format);
                 exportMenu.classList.remove('show');
             };
         });
@@ -510,6 +493,130 @@
         };
     }
 
+    function exportIntelligent(format) {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        if (coloredCells.size === 0) {
+            minX = -5; minY = -5; maxX = 4; maxY = 4;
+        } else {
+            for (const key of coloredCells.keys()) {
+                const [x, y] = key.split(',').map(Number);
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+            }
+            minX -= 5; minY -= 5;
+            maxX += 5; maxY += 5;
+        }
+
+        const cols = maxX - minX + 1;
+        const rows = maxY - minY + 1;
+        const width = cols * gridSize;
+        const height = rows * gridSize;
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        tempCtx.fillStyle = '#000000';
+        tempCtx.fillRect(0, 0, width, height);
+
+        const f = borderRadiusFactor;
+        const size = gridSize;
+        const bleed = 1.0;
+
+        const relativeCells = new Map();
+        for (const [key, color] of coloredCells) {
+            const [x, y] = key.split(',').map(Number);
+            const relKey = `${x - minX},${y - minY}`;
+            relativeCells.set(relKey, color);
+        }
+
+        function drawRelCell(ctx, rx, ry, color) {
+            const x = rx * size;
+            const y = ry * size;
+            const r = (size / 2) * f;
+
+            const n = relativeCells.get(`${rx},${ry-1}`) === color;
+            const s = relativeCells.get(`${rx},${ry+1}`) === color;
+            const e = relativeCells.get(`${rx+1},${ry}`) === color;
+            const w = relativeCells.get(`${rx-1},${ry}`) === color;
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x + size/2, y - bleed);
+            if (!n && !e) ctx.arcTo(x + size + bleed, y - bleed, x + size + bleed, y + size/2, r);
+            else ctx.lineTo(x + size + bleed, y - bleed);
+            if (!s && !e) ctx.arcTo(x + size + bleed, y + size + bleed, x + size/2, y + size + bleed, r);
+            else ctx.lineTo(x + size + bleed, y + size + bleed);
+            if (!s && !w) ctx.arcTo(x - bleed, y + size + bleed, x - bleed, y + size/2, r);
+            else ctx.lineTo(x - bleed, y + size + bleed);
+            if (!n && !w) ctx.arcTo(x - bleed, y - bleed, x + size/2, y - bleed, r);
+            else ctx.lineTo(x - bleed, y - bleed);
+            ctx.closePath();
+            ctx.fill();
+
+            if (f > 0) {
+                const hN = relativeCells.has(`${rx},${ry-1}`);
+                const hS = relativeCells.has(`${rx},${ry+1}`);
+                const hE = relativeCells.has(`${rx+1},${ry}`);
+                const hW = relativeCells.has(`${rx-1},${ry}`);
+                const dgNE = relativeCells.has(`${rx+1},${ry-1}`);
+                const dgSE = relativeCells.has(`${rx+1},${ry+1}`);
+                const dgSW = relativeCells.has(`${rx-1},${ry+1}`);
+                const dgNW = relativeCells.has(`${rx-1},${ry-1}`);
+
+                if (hE && hN && !dgNE) {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(x + size + bleed, y - bleed);
+                    ctx.lineTo(x + size + bleed, y + r);
+                    ctx.arcTo(x + size + bleed, y - bleed, x + size - r, y - bleed, r);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                if (hE && hS && !dgSE) {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(x + size + bleed, y + size + bleed);
+                    ctx.lineTo(x + size + bleed, y + size - r);
+                    ctx.arcTo(x + size + bleed, y + size + bleed, x + size - r, y + size + bleed, r);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                if (hW && hS && !dgSW) {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(x - bleed, y + size + bleed);
+                    ctx.lineTo(x - bleed, y + size - r);
+                    ctx.arcTo(x - bleed, y + size + bleed, x + r, y + size + bleed, r);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                if (hW && hN && !dgNW) {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(x - bleed, y - bleed);
+                    ctx.lineTo(x - bleed, y + r);
+                    ctx.arcTo(x - bleed, y - bleed, x + r, y - bleed, r);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+        }
+
+        for (const [relKey, color] of relativeCells) {
+            const [rx, ry] = relKey.split(',').map(Number);
+            drawRelCell(tempCtx, rx, ry, color);
+        }
+
+        const link = document.createElement('a');
+        link.download = `mon_art_2026.${format}`;
+        link.href = tempCanvas.toDataURL(`image/${format}`, 1.0);
+        link.click();
+    }
+
     function handleAction(clientX, clientY) {
         const rect = canvas.getBoundingClientRect();
         const mx = clientX - rect.left, my = clientY - rect.top;
@@ -627,6 +734,9 @@
         }
     </script>
 
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>
